@@ -19,7 +19,7 @@ app.add_middleware(
 )
 
 # Load your trained model (replace with your actual model path)
-model = tf.keras.models.load_model('./model_2.h5')
+model = tf.keras.models.load_model('./models/Model_v1.h5')
 
 @app.get("/")
 async def root():
@@ -29,9 +29,10 @@ async def root():
 
 @app.post("/predict")
 async def make_predict(file: UploadFile = File(...)):
+
     # Read the image file
     contents = await file.read()
-    image = Image.open(io.BytesIO(contents))
+    image = Image.open(io.BytesIO(contents)).convert("RGB")  # Ensure the image is in RGB format
     image = image.resize((224, 224))
     prediction=predict(model,image)
     
@@ -48,12 +49,14 @@ async def make_predict(file: UploadFile = File(...)):
     # For now, return a dummy prediction
 
     if prediction==0:
-         result = "Cancer"  # Replace with actual prediction
+         result = 'Blister_Blide'  # Replace with actual prediction
     elif prediction==1:
-        result='no-cancer'
-
-   
+        result='Brown_Blight'
+    else:
+        result = 'healthy'
     return {"prediction": result}
+
+
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000) 
